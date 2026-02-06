@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, FileText, Clock, AlertTriangle, TrendingUp, Calendar, User, Sparkles } from 'lucide-react'
 import { getOffers, saveOffers, getProjects, type Offer } from '../data/mockData'
 import { calculateScreening, type ScreeningResult } from '../data/aiScreening'
@@ -13,6 +14,7 @@ const kanbanColumns: { id: Offer['phase']; title: string; color: string; bgColor
 ]
 
 function Angebote() {
+  const [searchParams] = useSearchParams()
   const [offers, setOffers] = useState<Offer[]>([])
   const [draggedOffer, setDraggedOffer] = useState<Offer | null>(null)
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null)
@@ -20,8 +22,14 @@ function Angebote() {
   const [showNewOfferModal, setShowNewOfferModal] = useState(false)
 
   useEffect(() => {
-    setOffers(getOffers())
-  }, [])
+    const loaded = getOffers()
+    setOffers(loaded)
+    const offerId = searchParams.get('offer')
+    if (offerId) {
+      const match = loaded.find((o) => o.id === offerId)
+      if (match) setSelectedOffer(match)
+    }
+  }, [searchParams])
 
   // KPI Berechnungen
   const totalOffers = offers.length
