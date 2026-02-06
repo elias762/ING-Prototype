@@ -1,13 +1,19 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useSearchParams } from 'react-router-dom'
 import { LayoutDashboard, FolderKanban, FileText } from 'lucide-react'
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/projekte', icon: FolderKanban, label: 'Projekte' },
-  { to: '/angebote', icon: FileText, label: 'Angebote' },
+const allNavItems = [
+  { to: '/', key: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/projekte', key: 'projekte', icon: FolderKanban, label: 'Projekte' },
+  { to: '/angebote', key: 'angebote', icon: FileText, label: 'Angebote' },
 ]
 
 function Sidebar() {
+  const [searchParams] = useSearchParams()
+  const pagesParam = searchParams.get('pages')
+  const navItems = pagesParam
+    ? allNavItems.filter((item) => pagesParam.split(',').includes(item.key))
+    : allNavItems
+
   return (
     <aside className="w-64 bg-slate-900 text-white flex flex-col">
       <div className="p-4 bg-white">
