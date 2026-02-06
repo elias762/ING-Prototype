@@ -14,6 +14,10 @@ function Sidebar() {
     ? allNavItems.filter((item) => pagesParam.split(',').includes(item.key))
     : allNavItems
 
+  // Preserve pages param when navigating
+  const withPages = (path: string) =>
+    pagesParam ? `${path}?pages=${pagesParam}` : path
+
   return (
     <aside className="w-64 bg-slate-900 text-white flex flex-col">
       <div className="p-4 bg-white">
@@ -25,7 +29,7 @@ function Sidebar() {
           {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
-                to={item.to}
+                to={withPages(item.to)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     isActive
