@@ -15,9 +15,7 @@ import {
   getOffers,
   initialProjects,
   formatCurrency,
-  getDeadlineStatus,
-  type Project,
-  type Offer
+  getDeadlineStatus
 } from '../data/mockData'
 
 type QuickFilter = 'all' | 'critical' | 'my-projects'
