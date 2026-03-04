@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useMemo } from 'react'
 import { Search, RotateCcw, FileText, Euro, TrendingUp, FolderOpen, AlertTriangle, ChevronRight, Plus, BarChart3, Calendar } from 'lucide-react'
 import {

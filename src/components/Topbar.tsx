@@ -1,4 +1,6 @@
-import { useLocation } from 'react-router-dom'
+'use client'
+
+import { usePathname } from 'next/navigation'
 import { useLanguage } from '../i18n/LanguageContext'
 import type { TranslationKey } from '../i18n/translations'
 
@@ -9,9 +11,9 @@ const pageTitles: Record<string, TranslationKey> = {
 }
 
 function Topbar() {
-  const location = useLocation()
+  const pathname = usePathname()
   const { t } = useLanguage()
-  const titleKey = pageTitles[location.pathname] || 'nav.dashboard'
+  const titleKey = pageTitles[pathname] || 'nav.dashboard'
 
   return (
     <header className="bg-white border-b border-gray-100 px-8 py-4">

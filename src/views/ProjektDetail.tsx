@@ -1,5 +1,8 @@
+'use client'
+
 import { useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   ArrowLeft,
   Calendar,
@@ -23,8 +26,9 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import { useLanguage } from '../i18n/LanguageContext'
 
 function ProjektDetail() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
+  const params = useParams<{ id: string }>()
+  const id = params.id
+  const router = useRouter()
   const { t, dateLocale } = useLanguage()
 
   const { project, loading, update } = useProject(id)
@@ -38,7 +42,7 @@ function ProjektDetail() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <p className="text-gray-500 mb-4">{t('projectDetail.projectNotFound')}</p>
-          <Link to="/projekte" className="text-brand hover:text-brand-hover font-medium">
+          <Link href="/projekte" className="text-brand hover:text-brand-hover font-medium">
             {t('projectDetail.backToList')}
           </Link>
         </div>
@@ -125,7 +129,7 @@ function ProjektDetail() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <button
-        onClick={() => navigate('/projekte')}
+        onClick={() => router.push('/projekte')}
         className="flex items-center gap-2 text-gray-600 hover:text-[#333] transition-colors font-medium"
       >
         <ArrowLeft size={20} />

@@ -1,12 +1,20 @@
-import { Navigate } from 'react-router-dom'
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { useAuth } from './AuthContext'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
+  const router = useRouter()
 
-  if (loading) return null
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login')
+    }
+  }, [loading, user, router])
 
-  if (!user) return <Navigate to="/login" replace />
+  if (loading || !user) return null
 
   return <>{children}</>
 }

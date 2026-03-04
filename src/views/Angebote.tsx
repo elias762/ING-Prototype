@@ -1,5 +1,7 @@
+'use client'
+
 import { useState, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'next/navigation'
 import { Plus, FileText, Clock, AlertTriangle, TrendingUp, Calendar, User, Sparkles, BarChart3, ChevronRight } from 'lucide-react'
 import { type Offer } from '../data/mockData'
 import { calculateScreening, type ScreeningResult } from '../data/aiScreening'
@@ -12,7 +14,7 @@ import ViewToggle from '../components/ViewToggle'
 import { useLanguage } from '../i18n/LanguageContext'
 
 function Angebote() {
-  const [searchParams] = useSearchParams()
+  const searchParams = useSearchParams()
   const { t, dateLocale } = useLanguage()
   const { offers, loading: loadingOffers, create, update, patch, remove } = useOffers()
   const { projects: allProjects, loading: loadingProjects } = useProjects()

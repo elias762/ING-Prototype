@@ -1,5 +1,7 @@
-import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { useLanguage } from '../i18n/LanguageContext'
@@ -7,13 +9,18 @@ import { useLanguage } from '../i18n/LanguageContext'
 export default function Login() {
   const { user, signIn } = useAuth()
   const { t } = useLanguage()
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  if (user) return <Navigate to="/" replace />
+  useEffect(() => {
+    if (user) router.replace('/')
+  }, [user, router])
+
+  if (user) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -21,6 +21,7 @@ interface Props {
 
 function RichTextEditor({ value, onChange, onBlur, placeholder }: Props) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2] },

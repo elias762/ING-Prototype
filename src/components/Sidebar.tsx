@@ -1,16 +1,20 @@
-import { NavLink, useSearchParams } from 'react-router-dom'
+'use client'
+
+import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { LayoutDashboard, FolderKanban, FileText, Globe, LogOut } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { useAuth } from '../auth/AuthContext'
 
 const allNavItems = [
-  { to: '/', key: 'dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' as const },
-  { to: '/projekte', key: 'projekte', icon: FolderKanban, labelKey: 'nav.projects' as const },
-  { to: '/angebote', key: 'angebote', icon: FileText, labelKey: 'nav.offers' as const },
+  { href: '/', key: 'dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' as const },
+  { href: '/projekte', key: 'projekte', icon: FolderKanban, labelKey: 'nav.projects' as const },
+  { href: '/angebote', key: 'angebote', icon: FileText, labelKey: 'nav.offers' as const },
 ]
 
 function Sidebar() {
-  const [searchParams] = useSearchParams()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { lang, setLang, t } = useLanguage()
   const { user, profile, signOut } = useAuth()
   const pagesParam = searchParams.get('pages')
@@ -22,6 +26,9 @@ function Sidebar() {
   const withPages = (path: string) =>
     pagesParam ? `${path}?pages=${pagesParam}` : path
 
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href)
+
   return (
     <aside className="w-56 bg-white border-r border-gray-200/60 flex flex-col">
       <div className="p-4">
@@ -31,20 +38,18 @@ function Sidebar() {
       <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {navItems.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={withPages(item.to)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-brand/10 text-brand font-semibold border-l-2 border-brand -ml-[2px]'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-[#333]'
-                  }`
-                }
+            <li key={item.href}>
+              <Link
+                href={withPages(item.href)}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                  isActive(item.href)
+                    ? 'bg-brand/10 text-brand font-semibold border-l-2 border-brand -ml-[2px]'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-[#333]'
+                }`}
               >
                 <item.icon size={20} />
                 <span className="font-medium">{t(item.labelKey)}</span>
-              </NavLink>
+              </Link>
             </li>
           ))}
         </ul>

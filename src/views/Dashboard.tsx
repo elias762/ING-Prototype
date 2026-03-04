@@ -1,5 +1,8 @@
+'use client'
+
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Euro,
   FolderOpen,
@@ -48,7 +51,7 @@ const PHASE_COLORS: Record<string, string> = {
 }
 
 function Dashboard() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const { t, dateLocale } = useLanguage()
   const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
 
@@ -327,7 +330,7 @@ function Dashboard() {
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{t('dashboard.offerPipelineStatus')}</h3>
-            <Link to="/angebote" className="text-sm text-brand hover:text-brand-hover font-medium">
+            <Link href="/angebote" className="text-sm text-brand hover:text-brand-hover font-medium">
               {t('dashboard.openPipeline')}
             </Link>
           </div>
@@ -354,7 +357,7 @@ function Dashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{t('dashboard.upcomingDeadlines')}</h3>
-            <Link to="/projekte" className="text-sm text-brand hover:text-brand-hover font-medium flex items-center gap-1">
+            <Link href="/projekte" className="text-sm text-brand hover:text-brand-hover font-medium flex items-center gap-1">
               {t('dashboard.all')} <ChevronRight size={16} />
             </Link>
           </div>
@@ -375,7 +378,7 @@ function Dashboard() {
                   return (
                     <tr
                       key={project.id}
-                      onClick={() => navigate('/projekte')}
+                      onClick={() => router.push('/projekte')}
                       className="hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <td className="px-6 py-3 font-mono text-xs text-gray-500 whitespace-nowrap">{project.projectNumber}</td>
@@ -459,7 +462,7 @@ function Dashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{t('dashboard.criticalOffers')}</h3>
-          <Link to="/angebote" className="text-sm text-brand hover:text-brand-hover font-medium flex items-center gap-1">
+          <Link href="/angebote" className="text-sm text-brand hover:text-brand-hover font-medium flex items-center gap-1">
             {t('dashboard.pipeline')} <ChevronRight size={16} />
           </Link>
         </div>
@@ -470,7 +473,7 @@ function Dashboard() {
               return (
                 <div
                   key={offer.id}
-                  onClick={() => navigate('/angebote')}
+                  onClick={() => router.push('/angebote')}
                   className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md cursor-pointer transition-all group"
                 >
                   <div className="flex items-center justify-between mb-3">
