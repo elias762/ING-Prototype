@@ -1,172 +1,277 @@
-import { X, Calendar, User, Clock, FileText, Building, Trash2 } from 'lucide-react'
-import { type Offer, getProjects, getOffers } from '../data/mockData'
+import { useState, useEffect, useRef } from 'react'
+import { Trash2 } from 'lucide-react'
+import { type Offer, type Project } from '../data/mockData'
+import { updateOffer } from '../services/offerService'
 import { calculateScreening } from '../data/aiScreening'
 import ScreeningDetailSection from './ScreeningDetailSection'
+import Drawer from './Drawer'
+import CustomSelect from './CustomSelect'
+import DatePicker from './DatePicker'
+import RichTextEditor from './RichTextEditor'
+import { useLanguage } from '../i18n/LanguageContext'
 
 interface Props {
   offer: Offer
+  allProjects: Project[]
+  allOffers: Offer[]
   onClose: () => void
   onDelete: (id: string) => void
-  onUpdatePhase: (id: string, phase: Offer['phase']) => void
+  onUpdate: (updated: Offer) => void
 }
 
 const phases: Offer['phase'][] = ['Anfrage', 'Analyse', 'Vorbereitung', 'Abgabe']
+const teamOptions = ['Max', 'Arne', 'David', 'Florian', 'Thomas', 'Stefan']
 
-function OfferDetailModal({ offer, onClose, onDelete, onUpdatePhase }: Props) {
+interface FormState {
+  title: string
+  client: string
+  owner: string
+  phase: Offer['phase']
+  dueDate: string
+  effortDays: string
+  notes: string
+}
+
+function offerToForm(o: Offer): FormState {
+  return {
+    title: o.title,
+    client: o.client,
+    owner: o.owner,
+    phase: o.phase,
+    dueDate: o.dueDate,
+    effortDays: String(o.effortDays),
+    notes: o.notes || '',
+  }
+}
+
+function OfferDetailModal({ offer, allProjects, allOffers, onClose, onDelete, onUpdate }: Props) {
+  const { t } = useLanguage()
+  const [form, setForm] = useState<FormState>(() => offerToForm(offer))
+
+  const prevOfferIdRef = useRef(offer.id)
+  useEffect(() => {
+    if (offer.id !== prevOfferIdRef.current) {
+      setForm(offerToForm(offer))
+      prevOfferIdRef.current = offer.id
+    }
+  }, [offer.id])
+
+  const screening = calculateScreening(offer, allProjects, allOffers)
+
   const getPhaseColor = (phase: string) => {
     switch (phase) {
-      case 'Anfrage': return 'bg-gray-100 text-gray-700 border-gray-200'
-      case 'Analyse': return 'bg-blue-100 text-blue-700 border-blue-200'
-      case 'Vorbereitung': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'Abgabe': return 'bg-green-100 text-green-700 border-green-200'
-      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+      case 'Anfrage': return 'bg-gray-100 text-gray-600 border-gray-200'
+      case 'Analyse': return 'bg-blue-50 text-blue-600 border-blue-200'
+      case 'Vorbereitung': return 'bg-yellow-50 text-yellow-600 border-yellow-200'
+      case 'Abgabe': return 'bg-green-50 text-green-600 border-green-200'
+      default: return 'bg-gray-100 text-gray-600 border-gray-200'
     }
   }
 
-  const getDeadlineStatus = () => {
-    const now = new Date()
-    const deadline = new Date(offer.dueDate)
-    const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-
-    if (diffDays < 0) return { color: 'text-red-600 bg-red-50', label: 'Überfällig' }
-    if (diffDays <= 7) return { color: 'text-red-600 bg-red-50', label: 'Dringend' }
-    if (diffDays <= 14) return { color: 'text-yellow-600 bg-yellow-50', label: 'Bald fällig' }
-    return { color: 'text-green-600 bg-green-50', label: 'Im Plan' }
+  const doUpdate = async (updates: Partial<Offer>) => {
+    try {
+      const updated = await updateOffer(offer.id, updates)
+      onUpdate(updated)
+    } catch {
+      // silently fail for demo
+    }
   }
 
-  const deadlineStatus = getDeadlineStatus()
+  const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setForm(prev => ({ ...prev, [key]: value }))
+  }
 
-  const screening = offer.phase === 'Anfrage'
-    ? calculateScreening(offer, getProjects(), getOffers())
-    : null
+  /* ---- Auto-save helpers ---- */
+
+  const handleBlurSave = (field: keyof FormState) => {
+    const fieldMap: Record<string, () => { changed: boolean; updates: Partial<Offer> }> = {
+      title: () => ({
+        changed: form.title !== offer.title,
+        updates: { title: form.title },
+      }),
+      client: () => ({
+        changed: form.client !== offer.client,
+        updates: { client: form.client },
+      }),
+      dueDate: () => ({
+        changed: form.dueDate !== offer.dueDate,
+        updates: { dueDate: form.dueDate },
+      }),
+      effortDays: () => {
+        const val = Math.max(0, parseInt(form.effortDays) || 0)
+        return { changed: val !== offer.effortDays, updates: { effortDays: val } }
+      },
+      notes: () => ({
+        changed: form.notes !== (offer.notes || ''),
+        updates: { notes: form.notes },
+      }),
+    }
+
+    const check = fieldMap[field]
+    if (check) {
+      const { changed, updates } = check()
+      if (changed) doUpdate(updates)
+    }
+  }
+
+  const handleSelectChange = (field: 'owner' | 'phase', value: string) => {
+    setField(field, value as any)
+    const current = offer[field]
+    if (value !== current) {
+      if (field === 'phase') doUpdate({ phase: value as Offer['phase'] })
+      else doUpdate({ [field]: value })
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      ;(e.target as HTMLElement).blur()
+    }
+  }
 
   const handleDelete = () => {
-    if (window.confirm('Angebot wirklich löschen?')) {
+    if (window.confirm(t('offerModal.confirmDelete'))) {
       onDelete(offer.id)
       onClose()
     }
   }
 
+  /* ---- Select options ---- */
+  const pmOptions = teamOptions.map(n => ({ value: n, label: n }))
+  const phaseOptions = phases.map(p => ({ value: p, label: t(`phase.${p}`) }))
+
+  const inputClasses = 'w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand/40 transition-colors'
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-start justify-between">
-          <div>
-            <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full border mb-2 ${getPhaseColor(offer.phase)}`}>
-              {offer.phase}
-            </span>
-            <h2 className="text-xl font-bold text-gray-900">{offer.title}</h2>
-            <p className="text-gray-500 mt-1">{offer.client}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <Building size={16} />
-                <span className="text-xs font-medium">Auftraggeber</span>
-              </div>
-              <p className="font-semibold text-gray-900">{offer.client}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <User size={16} />
-                <span className="text-xs font-medium">Projektleiter</span>
-              </div>
-              <p className="font-semibold text-gray-900">{offer.owner}</p>
-            </div>
-            <div className={`rounded-xl p-4 ${deadlineStatus.color}`}>
-              <div className="flex items-center gap-2 mb-1 opacity-75">
-                <Calendar size={16} />
-                <span className="text-xs font-medium">Abgabefrist</span>
-              </div>
-              <p className="font-semibold">{new Date(offer.dueDate).toLocaleDateString('de-DE', {
-                weekday: 'short',
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-              })}</p>
-              <span className="text-xs font-medium">{deadlineStatus.label}</span>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-gray-500 mb-1">
-                <Clock size={16} />
-                <span className="text-xs font-medium">Geschätzter Aufwand</span>
-              </div>
-              <p className="font-semibold text-gray-900">{offer.effortDays} Personentage</p>
-            </div>
-          </div>
-
-          {/* KI-Screening */}
-          {screening && <ScreeningDetailSection result={screening} />}
-
-          {/* Phase Selector */}
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-3">Phase ändern</p>
-            <div className="flex gap-2">
-              {phases.map(phase => (
-                <button
-                  key={phase}
-                  onClick={() => onUpdatePhase(offer.id, phase)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    offer.phase === phase
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {phase}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <div className="flex items-center gap-2 text-gray-500 mb-2">
-              <FileText size={16} />
-              <span className="text-sm font-medium">Notizen</span>
-            </div>
-            {offer.notes ? (
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                <p className="text-gray-700 whitespace-pre-wrap">{offer.notes}</p>
-              </div>
-            ) : (
-              <p className="text-gray-400 italic">Keine Notizen vorhanden</p>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-100 px-6 py-4 flex justify-between">
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
-          >
-            <Trash2 size={18} />
-            Löschen
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Schließen
-          </button>
+    <Drawer onClose={onClose}>
+      {/* Header */}
+      <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 pr-14 z-10">
+        <div>
+          <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full border mb-2 ${getPhaseColor(offer.phase)}`}>
+            {t(`phase.${offer.phase}`)}
+          </span>
+          <h2 className="text-xl font-semibold text-[#333]">{offer.title}</h2>
+          <p className="text-gray-500 mt-1">{offer.client}</p>
         </div>
       </div>
-    </div>
+
+      {/* Content */}
+      <div className="p-6 pt-4 space-y-0">
+        {/* AI Screening */}
+        <div className="mb-4">
+          <ScreeningDetailSection result={screening} />
+        </div>
+
+        {/* Title */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('modal.title')}</label>
+          <input
+            type="text"
+            value={form.title}
+            onChange={e => setField('title', e.target.value)}
+            onBlur={() => handleBlurSave('title')}
+            onKeyDown={handleKeyDown}
+            className={inputClasses}
+          />
+        </div>
+
+        {/* Client */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('offerModal.client')}</label>
+          <input
+            type="text"
+            value={form.client}
+            onChange={e => setField('client', e.target.value)}
+            onBlur={() => handleBlurSave('client')}
+            onKeyDown={handleKeyDown}
+            className={inputClasses}
+          />
+        </div>
+
+        {/* Owner (PM) */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('offerModal.projectManager')}</label>
+          <div className="flex-1">
+            <CustomSelect
+              variant="form"
+              options={pmOptions}
+              value={form.owner}
+              onChange={v => handleSelectChange('owner', v)}
+            />
+          </div>
+        </div>
+
+        {/* Phase */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('offerModal.changePhase')}</label>
+          <div className="flex-1">
+            <CustomSelect
+              variant="form"
+              options={phaseOptions}
+              value={form.phase}
+              onChange={v => handleSelectChange('phase', v)}
+            />
+          </div>
+        </div>
+
+        {/* Due Date */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('offerModal.dueDate')}</label>
+          <DatePicker
+            value={form.dueDate}
+            onChange={v => setField('dueDate', v)}
+            onBlur={() => handleBlurSave('dueDate')}
+            className={inputClasses}
+          />
+        </div>
+
+        {/* Effort (PT) */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0">{t('offerModal.estimatedEffort')}</label>
+          <div className="flex items-center gap-2 flex-1">
+            <input
+              type="number"
+              min={0}
+              value={form.effortDays}
+              onChange={e => setField('effortDays', e.target.value)}
+              onBlur={() => handleBlurSave('effortDays')}
+              onKeyDown={handleKeyDown}
+              className={inputClasses}
+            />
+            <span className="text-sm text-gray-500 shrink-0">PT</span>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="flex items-start gap-3 py-3 border-b border-gray-100">
+          <label className="text-sm text-gray-500 w-36 shrink-0 pt-2">{t('offerModal.notes')}</label>
+          <RichTextEditor
+            value={form.notes}
+            onChange={v => setField('notes', v)}
+            onBlur={() => handleBlurSave('notes')}
+            placeholder={t('offerModal.noNotes')}
+          />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex justify-between">
+        <button
+          onClick={handleDelete}
+          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+        >
+          <Trash2 size={18} />
+          {t('offerModal.delete')}
+        </button>
+        <button
+          onClick={onClose}
+          className="px-4 py-2 text-white bg-[#333] rounded-lg hover:bg-[#222] transition-colors font-medium"
+        >
+          {t('offerModal.close')}
+        </button>
+      </div>
+    </Drawer>
   )
 }
 

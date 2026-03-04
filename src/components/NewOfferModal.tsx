@@ -1,13 +1,28 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
 import { type Offer } from '../data/mockData'
+import Drawer from './Drawer'
+import CustomSelect from './CustomSelect'
+import DatePicker from './DatePicker'
+import RichTextEditor from './RichTextEditor'
+import { useLanguage } from '../i18n/LanguageContext'
 
 interface Props {
   onClose: () => void
   onSave: (offer: Omit<Offer, 'id' | 'phase'>) => void
 }
 
+const ownerOptions = [
+  { value: 'Max', label: 'Max' },
+  { value: 'Arne', label: 'Arne' },
+  { value: 'David', label: 'David' },
+  { value: 'Florian', label: 'Florian' },
+  { value: 'Thomas', label: 'Thomas' },
+  { value: 'Stefan', label: 'Stefan' },
+]
+
 function NewOfferModal({ onClose, onSave }: Props) {
+  const { t } = useLanguage()
+
   const [formData, setFormData] = useState({
     client: '',
     title: '',
@@ -22,12 +37,12 @@ function NewOfferModal({ onClose, onSave }: Props) {
   const validate = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.client.trim()) newErrors.client = 'Auftraggeber ist erforderlich'
-    if (!formData.title.trim()) newErrors.title = 'Bezeichnung ist erforderlich'
-    if (!formData.owner.trim()) newErrors.owner = 'Projektleiter ist erforderlich'
-    if (!formData.dueDate) newErrors.dueDate = 'Abgabefrist ist erforderlich'
+    if (!formData.client.trim()) newErrors.client = t('newOffer.clientRequired')
+    if (!formData.title.trim()) newErrors.title = t('newOffer.titleRequired')
+    if (!formData.owner.trim()) newErrors.owner = t('newOffer.pmRequired')
+    if (!formData.dueDate) newErrors.dueDate = t('newOffer.dueDateRequired')
     if (!formData.effortDays || parseInt(formData.effortDays) <= 0) {
-      newErrors.effortDays = 'Gültiger Aufwand erforderlich'
+      newErrors.effortDays = t('newOffer.effortRequired')
     }
 
     setErrors(newErrors)
@@ -59,108 +74,86 @@ function NewOfferModal({ onClose, onSave }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg"
-        onClick={e => e.stopPropagation()}
-      >
+    <Drawer onClose={onClose}>
         {/* Header */}
-        <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">Neue Angebotsanfrage</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
+        <div className="border-b border-gray-100 px-6 py-4 pr-14">
+          <h2 className="text-xl font-semibold text-[#333]">{t('newOffer.title')}</h2>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Auftraggeber */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Auftraggeber <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              {t('newOffer.client')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.client}
               onChange={(e) => handleChange('client', e.target.value)}
-              placeholder="z.B. Stadt Bocholt"
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              placeholder={t('newOffer.clientPlaceholder')}
+              className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand/40 ${
                 errors.client ? 'border-red-300 bg-red-50' : 'border-gray-200'
               }`}
             />
             {errors.client && <p className="text-red-500 text-xs mt-1">{errors.client}</p>}
           </div>
 
-          {/* Angebotsbezeichnung */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Angebotsbezeichnung <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              {t('newOffer.offerTitle')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="z.B. Erschließung Neubaugebiet Nord"
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              placeholder={t('newOffer.offerTitlePlaceholder')}
+              className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand/40 ${
                 errors.title ? 'border-red-300 bg-red-50' : 'border-gray-200'
               }`}
             />
             {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
           </div>
 
-          {/* Projektleiter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Projektleiter <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              {t('newOffer.projectManager')} <span className="text-red-500">*</span>
             </label>
-            <select
+            <CustomSelect
               value={formData.owner}
-              onChange={(e) => handleChange('owner', e.target.value)}
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.owner ? 'border-red-300 bg-red-50' : 'border-gray-200'
-              }`}
-            >
-              <option value="">Auswählen...</option>
-              <option value="Max">Max</option>
-              <option value="Arne">Arne</option>
-              <option value="David">David</option>
-              <option value="Florian">Florian</option>
-              <option value="Thomas">Thomas</option>
-              <option value="Stefan">Stefan</option>
-            </select>
+              onChange={(v) => handleChange('owner', v)}
+              placeholder={t('newOffer.select')}
+              error={!!errors.owner}
+              options={ownerOptions}
+            />
             {errors.owner && <p className="text-red-500 text-xs mt-1">{errors.owner}</p>}
           </div>
 
-          {/* Abgabefrist & Aufwand */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Abgabefrist <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                {t('newOffer.dueDate')} <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={formData.dueDate}
-                onChange={(e) => handleChange('dueDate', e.target.value)}
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                onChange={(v) => handleChange('dueDate', v)}
+                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand/40 ${
                   errors.dueDate ? 'border-red-300 bg-red-50' : 'border-gray-200'
                 }`}
+                error={!!errors.dueDate}
               />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Aufwand (PT) <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                {t('newOffer.effortPT')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 min="1"
                 value={formData.effortDays}
                 onChange={(e) => handleChange('effortDays', e.target.value)}
-                placeholder="z.B. 15"
-                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                placeholder={t('newOffer.effortPlaceholder')}
+                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brand/30 focus:border-brand/40 ${
                   errors.effortDays ? 'border-red-300 bg-red-50' : 'border-gray-200'
                 }`}
               />
@@ -168,39 +161,34 @@ function NewOfferModal({ onClose, onSave }: Props) {
             </div>
           </div>
 
-          {/* Notizen */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notizen <span className="text-gray-400">(optional)</span>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              {t('newOffer.notes')} <span className="text-gray-400">({t('newOffer.optional')})</span>
             </label>
-            <textarea
+            <RichTextEditor
               value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              placeholder="Zusätzliche Informationen zum Angebot..."
-              rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              onChange={(v) => handleChange('notes', v)}
+              placeholder={t('newOffer.notesPlaceholder')}
             />
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
-              Abbrechen
+              {t('newOffer.cancel')}
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="flex-1 px-4 py-2.5 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors font-medium"
             >
-              Anfrage erstellen
+              {t('newOffer.createRequest')}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Drawer>
   )
 }
 

@@ -1,5 +1,97 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand: #01B593;
+  --color-brand-hover: #019a7d;
+  --color-brand-light: #e6f7f4;
+  --color-brand-50: #f0faf8;
+  --color-text: #333333;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333333;
+}
+
+/* Refined scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Rich text editor & display prose styles */
+.rich-text h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0.5em 0 0.25em;
+}
+
+.rich-text h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0.5em 0 0.25em;
+}
+
+.rich-text p {
+  margin: 0.25em 0;
+}
+
+.rich-text ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
+.rich-text ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 0.25em 0;
+}
+
+.rich-text li {
+  margin: 0.15em 0;
+}
+
+.rich-text strong {
+  font-weight: 600;
+}
+
+.rich-text em {
+  font-style: italic;
+}
+
+.rich-text u {
+  text-decoration: underline;
+}
+
+.sticky-shadow {
+  border-right: 1px solid #d1d5db;
+}
+
+.sticky-shadow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -7px;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.06), transparent);
+  pointer-events: none;
 }

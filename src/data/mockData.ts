@@ -11,6 +11,13 @@ export interface Project {
   projectVolume: number
   invoicedAmount: number
   notes?: string
+  client?: string
+  serviceScope?: string
+  commissionedServices?: string[]
+  teamMembers?: string[]
+  plannedDurationDays?: number
+  plannedEffortDays?: number
+  lastInvoiceDate?: string
 }
 
 export interface Offer {
@@ -237,39 +244,6 @@ export const initialOffers: Offer[] = [
     notes: "LP1–LP3 bis Ende 2025"
   }
 ]
-
-// localStorage Helpers
-const PROJECTS_KEY = 'ing-plan-projects'
-const OFFERS_KEY = 'ing-plan-offers'
-
-export function getProjects(): Project[] {
-  const stored = localStorage.getItem(PROJECTS_KEY)
-  if (stored) {
-    return JSON.parse(stored)
-  }
-  // Speichere initiale Daten beim ersten Laden
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(initialProjects))
-  return initialProjects
-}
-
-export function saveProjects(projects: Project[]): void {
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects))
-}
-
-export function getOffers(): Offer[] {
-  const stored = localStorage.getItem(OFFERS_KEY)
-  return stored ? JSON.parse(stored) : initialOffers
-}
-
-export function saveOffers(offers: Offer[]): void {
-  localStorage.setItem(OFFERS_KEY, JSON.stringify(offers))
-}
-
-// Reset to initial data
-export function resetData(): void {
-  localStorage.removeItem(PROJECTS_KEY)
-  localStorage.removeItem(OFFERS_KEY)
-}
 
 // Helper: Berechne Abrechnungsfortschritt
 export function calculateBillingProgress(project: Project): number {

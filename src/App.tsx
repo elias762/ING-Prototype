@@ -2,16 +2,17 @@ import { Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
 import Projekte from './pages/Projekte'
-import ProjektDetail from './pages/ProjektDetail'
 import Angebote from './pages/Angebote'
+import Login from './pages/Login'
+import ProtectedRoute from './auth/ProtectedRoute'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<MainLayout />}>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="projekte" element={<Projekte />} />
-        <Route path="projekte/:id" element={<ProjektDetail />} />
         <Route path="angebote" element={<Angebote />} />
       </Route>
     </Routes>
