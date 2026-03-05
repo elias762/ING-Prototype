@@ -9,6 +9,7 @@ import CustomSelect from './CustomSelect'
 import DatePicker from './DatePicker'
 import RichTextEditor from './RichTextEditor'
 import { useLanguage } from '../i18n/LanguageContext'
+import { useProfiles } from '../hooks/useProfiles'
 
 interface Props {
   offer: Offer
@@ -20,7 +21,6 @@ interface Props {
 }
 
 const phases: Offer['phase'][] = ['Anfrage', 'Analyse', 'Vorbereitung', 'Abgabe']
-const teamOptions = ['Max', 'Arne', 'David', 'Florian', 'Thomas', 'Stefan']
 
 interface FormState {
   title: string
@@ -46,6 +46,8 @@ function offerToForm(o: Offer): FormState {
 
 function OfferDetailModal({ offer, allProjects, allOffers, onClose, onDelete, onUpdate }: Props) {
   const { t } = useLanguage()
+  const { profiles } = useProfiles()
+  const teamOptions = profiles.map(p => `${p.first_name} ${p.last_name}`.trim()).filter(Boolean)
   const [form, setForm] = useState<FormState>(() => offerToForm(offer))
 
   const prevOfferIdRef = useRef(offer.id)

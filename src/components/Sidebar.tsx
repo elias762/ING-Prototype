@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { LayoutDashboard, FolderKanban, FileText, Users, Globe, LogOut } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { useAuth } from '../auth/AuthContext'
+import ProfileDrawer from './ProfileDrawer'
 
 const TEAM_ADMIN_EMAILS = ['michal@asuno.co', 'elias@asuno.co']
 const TEAM_ADMIN_LAST_NAMES = ['Baumgarten', 'Jostmeier']
@@ -27,6 +29,7 @@ function Sidebar() {
   const searchParams = useSearchParams()
   const { lang, setLang, t } = useLanguage()
   const { user, profile, signOut } = useAuth()
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false)
   const pagesParam = searchParams.get('pages')
   const canSeeAdmin = isTeamAdmin(user?.email, profile?.last_name)
   const navItems = (pagesParam
@@ -99,19 +102,24 @@ function Sidebar() {
 
       <div className="p-4 border-t border-gray-100">
         <div className="flex items-center gap-3 px-4 py-2">
-          <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-sm font-medium text-white">
-            {(profile?.first_name || user?.email || '?')[0].toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[#333] truncate">
-              {profile?.first_name && profile?.last_name
-                ? `${profile.first_name} ${profile.last_name}`
-                : user?.email?.split('@')[0] || '?'}
-            </p>
-            <p className="text-xs text-gray-400 truncate">
-              {profile?.position || user?.email}
-            </p>
-          </div>
+          <button
+            onClick={() => setProfileDrawerOpen(true)}
+            className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center text-sm font-medium text-white shrink-0">
+              {(profile?.first_name || user?.email || '?')[0].toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[#333] truncate">
+                {profile?.first_name && profile?.last_name
+                  ? `${profile.first_name} ${profile.last_name}`
+                  : user?.email?.split('@')[0] || '?'}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {profile?.position || user?.email}
+              </p>
+            </div>
+          </button>
           <button
             onClick={signOut}
             title={t('auth.logout')}
@@ -121,6 +129,8 @@ function Sidebar() {
           </button>
         </div>
       </div>
+
+      <ProfileDrawer open={profileDrawerOpen} onClose={() => setProfileDrawerOpen(false)} />
     </aside>
   )
 }

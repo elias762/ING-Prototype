@@ -5,23 +5,20 @@ import CustomSelect from './CustomSelect'
 import DatePicker from './DatePicker'
 import RichTextEditor from './RichTextEditor'
 import { useLanguage } from '../i18n/LanguageContext'
+import { useProfiles } from '../hooks/useProfiles'
 
 interface Props {
   onClose: () => void
   onSave: (offer: Omit<Offer, 'id' | 'phase'>) => void
 }
 
-const ownerOptions = [
-  { value: 'Max', label: 'Max' },
-  { value: 'Arne', label: 'Arne' },
-  { value: 'David', label: 'David' },
-  { value: 'Florian', label: 'Florian' },
-  { value: 'Thomas', label: 'Thomas' },
-  { value: 'Stefan', label: 'Stefan' },
-]
-
 function NewOfferModal({ onClose, onSave }: Props) {
   const { t } = useLanguage()
+  const { profiles } = useProfiles()
+  const ownerOptions = profiles
+    .map(p => `${p.first_name} ${p.last_name}`.trim())
+    .filter(Boolean)
+    .map(name => ({ value: name, label: name }))
 
   const [formData, setFormData] = useState({
     client: '',

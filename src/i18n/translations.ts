@@ -312,6 +312,15 @@ const translations = {
   'team.lastNameRequired': { de: 'Nachname ist erforderlich', en: 'Last name is required' },
   'team.emailRequired': { de: 'E-Mail ist erforderlich', en: 'Email is required' },
   'team.passwordRequired': { de: 'Passwort ist erforderlich', en: 'Password is required' },
+
+  // Profile
+  'profile.edit': { de: 'Profil bearbeiten', en: 'Edit Profile' },
+  'profile.changePassword': { de: 'Passwort ändern', en: 'Change Password' },
+  'profile.newPassword': { de: 'Neues Passwort', en: 'New Password' },
+  'profile.confirmPassword': { de: 'Passwort bestätigen', en: 'Confirm Password' },
+  'profile.passwordMismatch': { de: 'Passwörter stimmen nicht überein', en: 'Passwords do not match' },
+  'profile.passwordTooShort': { de: 'Mindestens 6 Zeichen', en: 'At least 6 characters' },
+  'profile.saved': { de: 'Profil gespeichert', en: 'Profile saved' },
 } as const
 
 export type TranslationKey = keyof typeof translations
