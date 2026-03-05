@@ -1,13 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Users, Plus, Pencil, Trash2, Key } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext'
+import { useAuth } from '../auth/AuthContext'
+import { isTeamAdmin } from '../components/Sidebar'
 import { useTeamUsers, type TeamUser } from '../hooks/useTeamUsers'
 import Drawer from '../components/Drawer'
 
 function TeamManagement() {
   const { t } = useLanguage()
+  const { user, profile } = useAuth()
+  const router = useRouter()
+
+  if (!isTeamAdmin(user?.email, profile?.last_name)) {
+    router.replace('/')
+    return null
+  }
   const { users, loading, refetch, createUser, updateProfile, deleteUser } = useTeamUsers()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<TeamUser | null>(null)

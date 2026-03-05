@@ -6,11 +6,20 @@ import { LayoutDashboard, FolderKanban, FileText, Users, Globe, LogOut } from 'l
 import { useLanguage } from '../i18n/LanguageContext'
 import { useAuth } from '../auth/AuthContext'
 
+const TEAM_ADMIN_EMAILS = ['michal@asuno.co', 'elias@asuno.co']
+const TEAM_ADMIN_LAST_NAMES = ['Baumgarten', 'Jostmeier']
+
+export function isTeamAdmin(email?: string | null, lastName?: string | null) {
+  if (email && TEAM_ADMIN_EMAILS.includes(email)) return true
+  if (lastName && TEAM_ADMIN_LAST_NAMES.includes(lastName)) return true
+  return false
+}
+
 const allNavItems = [
   { href: '/', key: 'dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' as const },
   { href: '/projekte', key: 'projekte', icon: FolderKanban, labelKey: 'nav.projects' as const },
   { href: '/angebote', key: 'angebote', icon: FileText, labelKey: 'nav.offers' as const },
-  { href: '/team', key: 'team', icon: Users, labelKey: 'nav.team' as const },
+  { href: '/team', key: 'team', icon: Users, labelKey: 'nav.team' as const, adminOnly: true },
 ]
 
 function Sidebar() {
@@ -19,9 +28,11 @@ function Sidebar() {
   const { lang, setLang, t } = useLanguage()
   const { user, profile, signOut } = useAuth()
   const pagesParam = searchParams.get('pages')
-  const navItems = pagesParam
+  const canSeeAdmin = isTeamAdmin(user?.email, profile?.last_name)
+  const navItems = (pagesParam
     ? allNavItems.filter((item) => pagesParam.split(',').includes(item.key))
     : allNavItems
+  ).filter((item) => !item.adminOnly || canSeeAdmin)
 
   // Preserve pages param when navigating
   const withPages = (path: string) =>
