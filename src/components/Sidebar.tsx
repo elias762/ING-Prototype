@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, FolderKanban, FileText, Globe, LogOut } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, FileText, Users, Globe, LogOut } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { useAuth } from '../auth/AuthContext'
 
@@ -10,6 +10,7 @@ const allNavItems = [
   { href: '/', key: 'dashboard', icon: LayoutDashboard, labelKey: 'nav.dashboard' as const },
   { href: '/projekte', key: 'projekte', icon: FolderKanban, labelKey: 'nav.projects' as const },
   { href: '/angebote', key: 'angebote', icon: FileText, labelKey: 'nav.offers' as const },
+  { href: '/team', key: 'team', icon: Users, labelKey: 'nav.team' as const },
 ]
 
 function Sidebar() {

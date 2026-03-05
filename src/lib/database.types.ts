@@ -93,6 +93,7 @@ export type Database = {
           notes: string | null
           planned_duration_days: number | null
           planned_effort_days: number | null
+          priority: string | null
           progress: number
           project_manager: string
           project_number: string
@@ -115,6 +116,7 @@ export type Database = {
           notes?: string | null
           planned_duration_days?: number | null
           planned_effort_days?: number | null
+          priority?: string | null
           progress?: number
           project_manager: string
           project_number: string
@@ -137,6 +139,7 @@ export type Database = {
           notes?: string | null
           planned_duration_days?: number | null
           planned_effort_days?: number | null
+          priority?: string | null
           progress?: number
           project_manager?: string
           project_number?: string

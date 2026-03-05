@@ -24,6 +24,7 @@ export function mapProjectRow(row: ProjectRow): Project {
     plannedDurationDays: row.planned_duration_days ?? undefined,
     plannedEffortDays: row.planned_effort_days != null ? Number(row.planned_effort_days) : undefined,
     lastInvoiceDate: row.last_invoice_date ?? undefined,
+    priority: row.priority ?? undefined,
   }
 }
 
@@ -48,6 +49,7 @@ export function mapProjectToRow(project: Partial<Project>): Record<string, unkno
   if (project.plannedDurationDays !== undefined) row.planned_duration_days = project.plannedDurationDays || null
   if (project.plannedEffortDays !== undefined) row.planned_effort_days = project.plannedEffortDays || null
   if (project.lastInvoiceDate !== undefined) row.last_invoice_date = project.lastInvoiceDate || null
+  if (project.priority !== undefined) row.priority = project.priority || null
 
   return row
 }

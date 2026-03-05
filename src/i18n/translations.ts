@@ -5,6 +5,7 @@ const translations = {
   'nav.dashboard': { de: 'Dashboard', en: 'Dashboard' },
   'nav.projects': { de: 'Projekte', en: 'Projects' },
   'nav.offers': { de: 'Angebote', en: 'Offers' },
+  'nav.team': { de: 'Team', en: 'Team' },
   'nav.projectManager': { de: 'Projektleiter', en: 'Project Manager' },
 
   // Topbar
@@ -293,6 +294,24 @@ const translations = {
   'auth.invalidCredentials': { de: 'Ungültige Anmeldedaten', en: 'Invalid credentials' },
   'auth.genericError': { de: 'Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.', en: 'Sign in failed. Please try again.' },
   'auth.logout': { de: 'Abmelden', en: 'Sign Out' },
+
+  // Team / User Management
+  'team.title': { de: 'Team', en: 'Team' },
+  'team.addUser': { de: 'Neuer Benutzer', en: 'New User' },
+  'team.name': { de: 'Name', en: 'Name' },
+  'team.firstName': { de: 'Vorname', en: 'First Name' },
+  'team.lastName': { de: 'Nachname', en: 'Last Name' },
+  'team.email': { de: 'E-Mail', en: 'Email' },
+  'team.password': { de: 'Passwort', en: 'Password' },
+  'team.position': { de: 'Position', en: 'Position' },
+  'team.positionPlaceholder': { de: 'z.B. Projektleiter', en: 'e.g. Project Manager' },
+  'team.created': { de: 'Erstellt', en: 'Created' },
+  'team.deleteConfirm': { de: 'Benutzer wirklich löschen?', en: 'Really delete this user?' },
+  'team.noUsers': { de: 'Keine Benutzer vorhanden', en: 'No users found' },
+  'team.firstNameRequired': { de: 'Vorname ist erforderlich', en: 'First name is required' },
+  'team.lastNameRequired': { de: 'Nachname ist erforderlich', en: 'Last name is required' },
+  'team.emailRequired': { de: 'E-Mail ist erforderlich', en: 'Email is required' },
+  'team.passwordRequired': { de: 'Passwort ist erforderlich', en: 'Password is required' },
 } as const
 
 export type TranslationKey = keyof typeof translations

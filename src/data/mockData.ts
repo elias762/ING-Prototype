@@ -18,6 +18,7 @@ export interface Project {
   plannedDurationDays?: number
   plannedEffortDays?: number
   lastInvoiceDate?: string
+  priority?: string
 }
 
 export interface Offer {
